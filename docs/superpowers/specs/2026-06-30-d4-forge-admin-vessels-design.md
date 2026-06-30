@@ -21,11 +21,19 @@ Concretely, this slice delivers:
    Each match (≤1%) becomes a golden fixture.
 
 It is **proper, not pretty**: robust and correct, minimal QoL. Flutter web app + .NET backend for
-everything; DynamoDB for persistence (DynamoDB Local in dev, cloud later — costs accepted by the owner).
+everything; **persistence = real AWS DynamoDB now** (owner accepts costs), **not** DynamoDB Local / Docker.
 
-This is a **personal project**, separate from Bruceware (honors project-separation). It reuses Bruceware
-*patterns and generic capabilities* (the BW.Libs.Config Vessel contract; the mr_laka render-engine pattern)
-but **copies no Bruceware application code**.
+**Infra (user INFRA STEER, locked 2026-06-30):**
+- Storage connects to **real AWS DynamoDB**; **compute runs LOCALLY** for now (local code → real cloud tables).
+  No ALB / hosting / compute infra in this slice — just the DDB connection.
+- AWS: profile **`Bruceware_Admin`** (SSO Admin), account **`560719246675`**, region **`eu-central-1`**. D4
+  tables are **`d4bf_`-prefixed** (separation at table-name level; existing `bw-grooming-*` tables untouched).
+- Future hosting domain (later plan): `d4.buildforge.bruceware.com`.
+
+This is a **personal project**, separate from Bruceware (honors project-separation). It **shares Bruceware
+infra** (same AWS account + a Bruceware subdomain) — infra-sharing, NOT code-mixing; the separation law holds
+at the code/repo/engine/table level. It reuses Bruceware *patterns and generic capabilities* (the
+BW.Libs.Config Vessel contract; the mr_laka render-engine pattern) but **copies no Bruceware application code**.
 
 ## 2. The paradigm: Vessels + a schemaless render engine
 
@@ -59,7 +67,7 @@ Forge uses the same split:
   (A single monolithic items vessel would not scale to thousands of items and is awkward to edit.)
 - **Tuning = true BW.Libs.Config Vessels** — `FormulaConfigVessel`, season-keyed (Vessel PK carries
   `seasonId`), holding divisors / scalars / bucket-bases. Honors the Config-Vessels mandate. This is the
-  vessel-backed implementation of the `ISeasonConfigProvider` seam already built on `feat/validation-harness`.
+  vessel-backed implementation of the `ISeasonConfigProvider` seam already built on `master` (merged `cf47acc`).
 
 `RenderRule`s supply the few constraints that make the generic editor produce valid D4 data:
 `slot`→enum, `rarity`→enum, `id`→readonly (server-assigned), numeric fields coerced via `fieldKind`.
@@ -127,9 +135,11 @@ public interface IRecordRepository {                 // collections (items, buil
 }
 ```
 
-Backed by **DynamoDB** (one table per collection, PK = `id`). `DynamoRecordRepository` in dev points at
-DynamoDB Local (Docker); same code points at cloud later. Records are stored/served as raw JSON so the render
-engine round-trips them losslessly. Tuning stays on the typed `IVessel` path (`FormulaConfigVessel`), unchanged.
+Backed by **real AWS DynamoDB** (one `d4bf_`-prefixed table per collection, e.g. `d4bf_items`, `d4bf_builds`;
+PK = `id`; account `560719246675`, `eu-central-1`, profile `Bruceware_Admin`). `DynamoRecordRepository` runs
+against the live cloud table from local compute — there is no Docker/Local variant. Records are stored/served
+as raw JSON so the render engine round-trips them losslessly. Tuning stays on the typed `IVessel` path
+(`FormulaConfigVessel`, season-keyed DDB), unchanged.
 
 ## 4. `src/Assembly` — record → engine `Build`
 
@@ -175,9 +185,9 @@ Flutter **web**, talks to `src/Api` over HTTP. Screens (all = list + `ConfigFiel
 
 | # | Slice | Owner | Depends on |
 |---|---|---|---|
-| 0 | Finish `feat/validation-harness` tasks 3–5 (`BreakdownFormatter`, `MaulScenario`, validation fixture), merge to `master` | quick (me / one worker) | in-flight branch |
+| 0 | ~~Finish validation-harness tasks 3–5, merge~~ — **DONE** (concurrent session, merged `cf47acc`, 33/33; `BreakdownFormatter` + `MaulScenario` + `MaulValidationTests` on `master`) | — | — |
 | 1 | **Freeze contracts**: §3 item/build JSON shapes + `IRecordRepository` interface + `src/Domain` record types → land on `master` | me, from this spec | this spec |
-| 2a | **Builder**: `src/Storage` (DynamoDB + Local), `src/Assembly` (`BuildAssembler` + affix dictionary), `src/Api` (CRUD + `/calc`), `d4_forge_admin` Flutter (render-engine port + 3 managers) | Worker A, own worktree off `master` | slice 1 |
+| 2a | **Builder**: `src/Storage` (real AWS DynamoDB, `d4bf_*` tables), `src/Assembly` (`BuildAssembler` + affix dictionary), `src/Api` (CRUD + `/calc`), `d4_forge_admin` Flutter (render-engine port + 3 managers) | Worker A, own worktree off `master` | slice 1 |
 | 2b | **Build-stealer**: Maxroll (curl Remix JSON) + Mobalytics (browser) importers → emit item/build records **in the §3 frozen shape** → persist via `POST /data/...` | Worker B, own worktree off `master` | slice 1 |
 
 Freezing §3 in slice 1 is what makes 2a and 2b parallel. Each worker works in its **own git worktree** off
@@ -188,20 +198,21 @@ Freezing §3 in slice 1 is what makes 2a and 2b parallel. Each worker works in i
 - **Engine**: unchanged, stays green (Ava golden fixture + validation fixtures).
 - **`src/Assembly`**: xUnit — assert a hand-built item/build record assembles to the same `CalcResult` as the
   equivalent hand-fed `MaulScenario` (ties new path to the proven path).
-- **`src/Api`**: integration test for each endpoint against DynamoDB Local (round-trip a record; `/calc` on a
-  seeded build returns the expected breakdown).
-- **`src/Storage`**: `DynamoRecordRepository` round-trip tests against DynamoDB Local.
+- **`src/Api`**: integration test for each endpoint against real DynamoDB (`d4bf_*test*` throwaway tables;
+  round-trip a record; `/calc` on a seeded build returns the expected breakdown).
+- **`src/Storage`**: `DynamoRecordRepository` round-trip tests against real DynamoDB (disposable test tables).
 - **Flutter**: widget tests for `ConfigField` (scalar/object/array render + edit + enum/readonly rules),
   mirroring the grooming admin's `field_kind_test`/`config_field_test`.
 
 ## 9. Out of scope (later)
 
 **`FormulaConfigVessel` (vessel-backed tuning) is a fast-follow, NOT this slice.** `/calc` runs on the
-existing `InMemorySeasonConfigProvider` (the `s13` Druid preset already on `feat/validation-harness`). §2.2
+existing `InMemorySeasonConfigProvider` (the `s13` Druid preset already on `master` (merged `cf47acc`)). §2.2
 describes the eventual vessel-backed implementation of that same `ISeasonConfigProvider` seam; swapping the
 provider is zero-caller-change and lands after the collections substrate is proven.
 
-Also later: auth / multi-user; cloud deploy (stays DynamoDB Local until proven); the AoE visualizer widget; Mitigation
+Also later: auth / multi-user; **hosting/compute infra** (ALB, the `d4.buildforge.bruceware.com` domain —
+compute stays LOCAL this slice; DDB is already real cloud); the AoE visualizer widget; Mitigation
 stage (Milestone 2, separate plan); paragon/skill-tree *editing* depth beyond the generic render (records
 exist, rich editors later); bulk-import trained-model corpus. Classes beyond Druid for v1.
 
