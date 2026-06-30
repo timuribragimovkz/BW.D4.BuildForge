@@ -7,3 +7,9 @@ build/
 pubspec.lock
 # macOS
 .DS_Store
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
