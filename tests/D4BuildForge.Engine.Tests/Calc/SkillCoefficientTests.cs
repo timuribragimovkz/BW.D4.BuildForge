@@ -1,5 +1,4 @@
 using D4BuildForge.Engine.Calc;
-using Xunit;
 
 namespace D4BuildForge.Engine.Tests.Calc;
 

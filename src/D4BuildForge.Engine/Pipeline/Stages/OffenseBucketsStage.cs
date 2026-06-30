@@ -44,6 +44,7 @@ public sealed class OffenseBucketsStage : IStage
         ctx.Breakdown.Add("MainStatMult", mainStatMult);
         ctx.Breakdown.Add("Additive", additive, "1 + Σ additive %");
         ctx.Breakdown.Add("VDM", vdm);
+        ctx.Breakdown.Add("CSDM", csdm);
         ctx.Breakdown.Add("ADMG", admg);
         ctx.Breakdown.Add("SkillCoeff", skillCoeff);
         ctx.Breakdown.Add(Keys.NonCrit, r.NonCrit);

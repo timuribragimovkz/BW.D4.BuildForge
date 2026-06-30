@@ -15,5 +15,6 @@ public sealed class BaseStatsStage : IStage
         ctx.Set(Keys.AttackSpeed, 1 + ctx.Pool.FlatSum(StatChannel.AttackSpeed));
         ctx.Breakdown.Add(Keys.MainStatSum, ctx.Get(Keys.MainStatSum));
         ctx.Breakdown.Add(Keys.CritChance, ctx.Get(Keys.CritChance));
+        ctx.Breakdown.Add("AttackSpeed", ctx.Get(Keys.AttackSpeed));
     }
 }
