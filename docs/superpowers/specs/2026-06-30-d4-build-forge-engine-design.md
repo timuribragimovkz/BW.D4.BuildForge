@@ -63,11 +63,13 @@ d4_build_forge/
                               # NO AWS, NO storage, NO web, NO BW.Libs dependency.
     D4BuildForge.Domain/      # game-content POCOs: Item, Affix, Skill, PassiveNode, ParagonNode,
                               # BaseStatTable, BuffDef, ConditionDef, FormulaConfig (tuning constants).
-    D4BuildForge.Storage/     # DynamoDB single-table repo (game content) + BW.Libs.Config vessel
-                              # wiring (tuning constants). THIS is the only project referencing
+    D4BuildForge.Storage/     # ONE DynamoDB table PER game-content concept (Items, Buffs, ClassesAndStats,
+                              # Skills, Passives, Paragon, Conditions, ...) + BW.Libs.Config vessel wiring
+                              # for CalculationSettings. THIS is the only project referencing
                               # BW.Libs.Config NuGet + AWS SDK.
-    D4BuildForge.Assembly/    # BuildAssembler: turns a selection (class/level/items/passives/paragon/
-                              # buffs/conditions/skill) + FormulaConfig into an engine `Build`.
+    D4BuildForge.Assembly/    # BuildAssembler ("the LEGO"): pulls the selected bricks from each table
+                              # (class/level/items/passives/paragon/buffs/conditions/skill), snaps them into
+                              # a character, applies items + CalculationSettings → an engine `Build`.
     D4BuildForge.Api/         # web API (LATER) — thin; calls Assembly + Engine.
   tests/
     D4BuildForge.Engine.Tests/    # golden fixtures: Ava reference model + live-game Maul scenarios.
@@ -166,17 +168,23 @@ record FormulaConfig(...);                     // tuning constants from BW.Libs.
 
 ---
 
-## 5. Storage substrate (split: vessels + entities)
+## 5. Storage substrate (table-per-concept "LEGO" + config vessels)
 
-Two distinct kinds of data, two stores — both DynamoDB Local via Docker in dev:
+**No single-table design.** Each game-content concept gets its **own DynamoDB table** (a bin of LEGO bricks);
+tuning constants are served through BW.Libs.Config vessels. All DynamoDB Local via Docker in dev:
 
-1. **Tuning constants → BW.Libs.Config vessels.** Bucket bases (crit 1.5, vulnerable base, …), main-stat
-   divisors (800; 900 Barbarian), the global skill scalar (Ava's `0.2`), etc. Loaded as a `FormulaConfig`
-   and handed to the engine. We **reference the published BW.Libs.Config NuGet** (a generic config library —
-   not Bruceware domain code, so it doesn't breach project separation); it lives **only** in `Storage`.
-2. **Game content → DynamoDB single-table entities.** Items/affixes, skills (incl. Maul's coefficient),
-   base-stat-per-level tables, passives, Paragon nodes, buff/condition definitions. Single-table design with a
-   hardcoded GSI1 (mirroring the user's established convention, in this project's own table — not Bruceware's).
+1. **Tuning constants → BW.Libs.Config vessels** (`CalculationSettings`). Bucket bases (crit 1.5, vulnerable
+   base, …), main-stat divisors (800; 900 Barbarian), the global skill scalar (Ava's `0.2`), etc. Loaded as a
+   `FormulaConfig` and handed to the engine. We **reference the published BW.Libs.Config NuGet** (a generic
+   config library — not Bruceware domain code, so no separation breach); it lives **only** in `Storage`. Its
+   backing store is effectively its own table, consistent with table-per-concept.
+2. **Game content → one DynamoDB table per concept.** Separate tables, e.g. `Items`, `Buffs`,
+   `ClassesAndStats` (base-stat-per-level), `Skills` (incl. Maul's coefficient), `Passives`, `Paragon`,
+   `Conditions` — and more as the catalog grows. Each table owns its own access pattern; no shared single table.
+
+**The LEGO assembly:** `BuildAssembler` selects bricks from the relevant tables for a given
+(class, level, items, passives, Paragon, buffs, conditions, skill), snaps them into a character, applies items
+and the `CalculationSettings` → produces an engine `Build` + `FormulaConfig`.
 
 `Storage` + `Assembly` are the only projects that know storage exists. The engine receives a `Build` +
 `FormulaConfig` and computes. Tests construct these literally, no Docker required.
@@ -245,12 +253,13 @@ Each its own spec → plan → implementation cycle, rough order:
 ## 9. Conventions & tech
 
 - **Language/runtime:** .NET (current LTS), C#. `Engine` is a pure library (no AWS/web/BW.Libs deps).
-- **Storage:** DynamoDB single-table (game content) + BW.Libs.Config vessels (tuning); DynamoDB Local via Docker in dev.
+- **Storage:** one DynamoDB table per game-content concept (Items, Buffs, ClassesAndStats, Skills, Passives,
+  Paragon, Conditions, …) + BW.Libs.Config vessels for CalculationSettings; DynamoDB Local via Docker in dev.
 - **Numerics:** `double`; assert with explicit tolerance (≤1%) in fixture tests.
 - **Testing:** xUnit; golden fixtures stored as data alongside tests; engine/assembly tests need no Docker.
 - **No hardcoded game constants in formula logic** — all values are data (§1, §5).
 - **Breakdown-first** — any computed number must be explainable via the breakdown (§4.6).
-- **Project separation** — own repo, own DynamoDB table; only the generic BW.Libs.Config NuGet is shared, and
+- **Project separation** — own repo, own DynamoDB tables; only the generic BW.Libs.Config NuGet is shared, and
   only in `Storage`.
 
 ---
@@ -263,5 +272,6 @@ Each its own spec → plan → implementation cycle, rough order:
 - **Overpower** — modeled as a conditional bucket; values/availability for Maul confirmed during validation.
 - **Maul specifics** — Werebear/Fortify/Overpower interactions and Maul's exact `baseCoeff` are supplied from
   the live game as data; the engine stays agnostic.
-- **Single-table key design for game content** — PK/SK + GSI1 access patterns to be finalized in the Storage plan.
+- **Per-table key design for game content** — PK/SK (and any GSI) for each concept table to be finalized in
+  the Storage plan; and whether `CalculationSettings` stays a config vessel or becomes a plain DynamoDB table.
 - **BW.Libs.Config NuGet surface** — confirm the published API for loading a vessel/KVP collection when wiring `Storage`.
