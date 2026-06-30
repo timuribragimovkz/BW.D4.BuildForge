@@ -6,6 +6,7 @@ engine that reproduces in-game numbers to ~1%, plus (beyond PoB) an AoE visualiz
 
 - Engine design spec: [docs/superpowers/specs/2026-06-30-d4-build-forge-engine-design.md](docs/superpowers/specs/2026-06-30-d4-build-forge-engine-design.md)
 - Reference damage model: `docs/reference/ava-damage-optimization.xlsx`
+- Build import sources (Mobalytics/Maxroll JSON shapes + extraction): [docs/reference/build-import-sources.md](docs/reference/build-import-sources.md)
 
 **Stack:** pure C# `Engine` library (storage-agnostic) · `Domain` POCOs · `Storage` (one DynamoDB table per
 game-content concept — Items, Buffs, ClassesAndStats, Skills, Passives, Paragon, Conditions… — plus
