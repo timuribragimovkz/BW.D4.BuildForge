@@ -1,0 +1,67 @@
+{
+  "vessel": "build-import-map",
+  "source": "mobalytics",
+  "schemaVersion": "1.0",
+  "match": { "anyPathExists": ["$.variants[*].slots", "$.data.data.buildVariants.values"] },
+  "root": "$",
+  "build": {
+    "clazz":     { "via": ["const:druid"] },
+    "name":      "$.name",
+    "sourceId":  "$.slug",
+    "sourceUrl": "$.source",
+    "variants":  { "from": "$.variants", "each": "@variant" },
+    "warnings":  { "via": ["const", [
+      "skillBar not exposed by Mobalytics (action bar not separable from skill-tree assignments)",
+      "affix rolled values not exposed by Mobalytics (only greater/masterwork flags)",
+      "paragon glyph/rotation/position not exposed by Mobalytics"
+    ]] }
+  },
+  "variant": {
+    "name":       "$.name",
+    "level":      { "via": ["const:null"] },
+    "worldTier":  { "via": ["const:null"] },
+    "gear":       { "from": "$.slots", "each": "@gearItem" },
+    "skillRanks": { "from": "$.skills[*].ref", "via": ["countRepeats"], "each": { "ref": { "$ref": { "kind": "skill", "id": "@key" } }, "rank": "@count" } },
+    "skillBar":   { "via": ["const:null"] },
+    "paragon":    { "boards": { "from": "$.paragon", "via": ["groupByRegex:^(.*)-x\\d+-y\\d+$"], "each": "@board" } },
+    "mercenary":  "@mercenary",
+    "classExtras":{ "from": "$.boons[*]", "via": ["flattenBoons"], "each": { "group": "spiritBoon", "animal": "@animal", "ref": { "kind": "boon", "id": "@self" } } }
+  },
+  "gearItem": {
+    "rawSlot":   "$.slotSlug",
+    "slot":      { "from": "$.slotSlug", "via": ["slotFromSlug:$vessel.slotTable"] },
+    "ref":       { "$ref": { "kind": "$.kind", "id": "$.ref", "name": "$.title" } },
+    "rarity":    "$.rarity",
+    "itemKind":  "$.kind",
+    "mythic":    { "from": "$.mods.mythic", "via": ["bool:false"] },
+    "implicits": { "from": "$.mods.implicit[*]", "each": "@affix" },
+    "explicits": { "from": "$.mods.gear[*]",     "each": "@affix" },
+    "tempers":   { "from": "$.mods.temper[*]",   "each": "@affix" },
+    "aspects":   { "via": ["const", []] },
+    "sockets":   { "from": "$.mods.sockets[*]",  "each": { "ref": { "$ref": { "kind": "$.kind", "id": "$.rune" } }, "sub": "$.sub" } }
+  },
+  "affix": {
+    "ref":        { "$ref": { "kind": "affix", "id": "$.stat" } },
+    "values":     { "via": ["const:null"] },
+    "greater":    { "from": "$.gr", "via": ["bool:false"] },
+    "masterwork": { "from": "$.mw", "via": ["bool:false"] }
+  },
+  "board": {
+    "ref":        { "$ref": { "kind": "paragonBoard", "id": "@key" } },
+    "nodes":      { "from": "@members", "each": { "ref": { "$ref": { "kind": "paragonNode", "id": "@self" } }, "rank": { "via": ["const:1"] } } },
+    "rotation":   { "via": ["const:null"] },
+    "position":   { "via": ["const:null"] },
+    "glyph":      { "via": ["const:null"] },
+    "glyphLevel": { "via": ["const:null"] }
+  },
+  "mercenary": {
+    "primary":       { "from": "$.mercenary.primary",       "ref": { "kind": "mercenary", "id": "@self" } },
+    "reinforcement": { "from": "$.mercenary.reinforcement", "ref": { "kind": "mercenary", "id": "@self" } },
+    "skill":         { "from": "$.mercenary.skill",         "ref": { "kind": "mercSkill", "id": "@self" } },
+    "skillTree":     { "from": "$.mercenary.skillTree[*].ref", "each": { "ref": { "$ref": { "kind": "mercSkill", "id": "@self" } } } }
+  },
+  "slotTable": {
+    "helm":"Helm","chest-armor":"Chest","gloves":"Gloves","pants":"Pants","boots":"Boots",
+    "amulet":"Amulet","ring-1":"Ring","ring-2":"Ring","weapon":"Weapon","offhand":"Offhand"
+  }
+}

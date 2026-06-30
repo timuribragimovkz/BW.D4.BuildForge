@@ -12,6 +12,9 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="fixtures/*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../src/D4BuildForge.Import/D4BuildForge.Import.csproj" />
   </ItemGroup>
 </Project>
