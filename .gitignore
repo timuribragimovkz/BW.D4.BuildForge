@@ -16,3 +16,6 @@ obj/
 
 # git worktrees
 .worktrees/
+
+# sdd scratch
+.superpowers/
