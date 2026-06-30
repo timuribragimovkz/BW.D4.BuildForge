@@ -2,7 +2,7 @@
   "vessel": "build-import-map",
   "source": "mobalytics",
   "schemaVersion": "1.0",
-  "match": { "anyPathExists": ["$.variants[*].slots", "$.data.data.buildVariants.values"] },
+  "match": { "anyPathExists": ["$.variants[*].slots"] },
   "root": "$",
   "build": {
     "clazz":     { "via": ["const:druid"] },
@@ -25,7 +25,7 @@
     "skillBar":   { "via": ["const:null"] },
     "paragon":    { "boards": { "from": "$.paragon", "via": ["groupByRegex:^(.*)-x\\d+-y\\d+$"], "each": "@board" } },
     "mercenary":  "@mercenary",
-    "classExtras":{ "from": "$.boons[*]", "via": ["flattenBoons"], "each": { "group": "spiritBoon", "animal": "@animal", "ref": { "kind": "boon", "id": "@self" } } }
+    "classExtras":{ "from": "$.boons[*]", "via": ["flattenBoons"], "each": { "group": "spiritBoon", "animal": "@animal", "ref": { "$ref": { "kind": "boon", "id": "@self" } } } }
   },
   "gearItem": {
     "rawSlot":   "$.slotSlug",
@@ -55,9 +55,9 @@
     "glyphLevel": { "via": ["const:null"] }
   },
   "mercenary": {
-    "primary":       { "from": "$.mercenary.primary",       "ref": { "kind": "mercenary", "id": "@self" } },
-    "reinforcement": { "from": "$.mercenary.reinforcement", "ref": { "kind": "mercenary", "id": "@self" } },
-    "skill":         { "from": "$.mercenary.skill",         "ref": { "kind": "mercSkill", "id": "@self" } },
+    "primary":       { "$ref": { "kind": "mercenary", "id": "$.mercenary.primary" } },
+    "reinforcement": { "$ref": { "kind": "mercenary", "id": "$.mercenary.reinforcement" } },
+    "skill":         { "$ref": { "kind": "mercSkill", "id": "$.mercenary.skill" } },
     "skillTree":     { "from": "$.mercenary.skillTree[*].ref", "each": { "ref": { "$ref": { "kind": "mercSkill", "id": "@self" } } } }
   },
   "slotTable": {
