@@ -1,0 +1,64 @@
+{
+  "vessel": "build-import-map",
+  "source": "maxroll",
+  "schemaVersion": "1.0",
+  "match": { "anyPathExists": ["$.data.profiles"] },
+  "root": "$",
+  "build": {
+    "clazz":     { "from": "$.class", "via": ["lower"] },
+    "name":      "$.name",
+    "sourceId":  "$.id",
+    "sourceUrl": { "from": "$.id", "via": ["format:https://maxroll.gg/d4/planner/{0}"] },
+    "variants":  { "from": "$.data.profiles", "each": "@variant" }
+  },
+  "variant": {
+    "name":       "$.name",
+    "level":      "$.level",
+    "worldTier":  "$.worldTier",
+    "gear":       { "from": "$.items", "via": ["entries", "derefItemPool:$root.data.items"], "each": "@gearItem" },
+    "skillRanks": { "from": "$.skillTree.steps[*].data", "via": ["mergeDicts", "entries", "dropZero"], "each": "@skillRank" },
+    "skillBar":   { "from": "$.skillBar[*]", "each": { "$ref": { "kind": "skill", "id": "@self" } } },
+    "paragon":    { "boards": { "from": "$.paragon.steps[*].data[*]", "each": "@board" } },
+    "mercenary":  "@mercenary",
+    "classExtras":{ "from": "$.spiritBoons[*]", "each": { "group": "spiritBoon", "ref": { "$ref": { "kind": "boon", "id": "@self" } } } }
+  },
+  "gearItem": {
+    "rawSlot":   "@key",
+    "slot":      { "from": "$.id", "via": ["slotFromItemId:$vessel.slotTable"] },
+    "ref":       { "$ref": { "kind": "item", "id": "$.id", "name": "$.name" } },
+    "rarity":    { "from": "$.id", "via": ["tokenAt:1"] },
+    "mythic":    { "from": "$.mythic", "via": ["bool:false"] },
+    "implicits": { "from": "$.implicits[*]", "each": "@affix" },
+    "explicits": { "from": "$.explicits[*]", "each": "@affix" },
+    "tempers":   { "from": "$.tempered[*]",  "each": "@affix" },
+    "aspects":   { "from": "$.aspects[*]",   "each": { "ref": { "$ref": { "kind": "aspect", "id": "$.nid" } }, "values": "$.values" } },
+    "sockets":   { "from": "$.sockets[*]",   "each": { "ref": { "$ref": { "kind": "gem", "id": "@self" } } } }
+  },
+  "affix": {
+    "ref":        { "$ref": { "kind": "affix", "id": "$.nid" } },
+    "values":     "$.values",
+    "greater":    { "from": "$.greater", "via": ["bool:false"] },
+    "masterwork": { "from": "$.upgrade", "via": ["bool:false"] }
+  },
+  "skillRank": { "ref": { "$ref": { "kind": "skill", "id": "@key" } }, "rank": "@value" },
+  "board": {
+    "ref":        { "$ref": { "kind": "paragonBoard", "id": "$.id" } },
+    "nodes":      { "from": "$.nodes", "via": ["entries"], "each": { "ref": { "$ref": { "kind": "paragonNode", "id": "@key" } }, "rank": "@value" } },
+    "rotation":   "$.rotation",
+    "position":   "$.position",
+    "glyph":      { "$ref": { "kind": "glyph", "id": "$.glyph" } },
+    "glyphLevel": "$.glyphLevel"
+  },
+  "mercenary": {
+    "primary":       { "$ref": { "kind": "mercenary", "id": "$.mercenary.id" } },
+    "reinforcement": { "$ref": { "kind": "mercenary", "id": "$.mercenary.support" } },
+    "skillTree":     { "from": "$.mercenary.tree", "via": ["entries"], "each": { "ref": { "$ref": { "kind": "mercSkill", "id": "@key" } }, "rank": "@value" } }
+  },
+  "slotTable": {
+    "Helm":"Helm","Chest":"Chest","Gloves":"Gloves","Pants":"Pants","Boots":"Boots",
+    "Amulet":"Amulet","Ring":"Ring","Talisman":"Talisman",
+    "2HMace":"Weapon","2HPolearm":"Weapon","2HAxe":"Weapon","2HSword":"Weapon","2HStaff":"Weapon","2HScythe":"Weapon",
+    "1HMace":"Weapon","1HSword":"Weapon","1HAxe":"Weapon","1HDagger":"Weapon","Bow":"Weapon","Crossbow":"Weapon","Glaive":"Weapon",
+    "Focus":"Offhand","Shield":"Offhand","Totem":"Offhand","S05":"Seasonal"
+  }
+}
