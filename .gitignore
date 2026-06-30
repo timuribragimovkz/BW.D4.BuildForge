@@ -13,3 +13,6 @@ bin/
 obj/
 *.user
 .vs/
+
+# git worktrees
+.worktrees/
