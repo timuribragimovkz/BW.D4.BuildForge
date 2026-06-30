@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Namespace "Assembly" intentionally shadows System.Reflection.Assembly (domain term: the LEGO assembler). -->
+    <NoWarn>$(NoWarn);CA1724</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D4BuildForge.Engine\D4BuildForge.Engine.csproj" />
+    <ProjectReference Include="..\D4BuildForge.Domain\D4BuildForge.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
