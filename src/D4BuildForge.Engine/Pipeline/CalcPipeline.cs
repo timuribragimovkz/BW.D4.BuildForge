@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 
 namespace D4BuildForge.Engine.Pipeline;
 
-public sealed class Pipeline
+public sealed class CalcPipeline
 {
     private readonly IReadOnlyList<IStage> _stages;
-    public Pipeline(params IStage[] stages) => _stages = stages;
+    public CalcPipeline(params IStage[] stages) => _stages = stages;
 
     public void Run(CalcContext ctx)
     {
