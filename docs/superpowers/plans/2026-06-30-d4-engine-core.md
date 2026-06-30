@@ -1299,7 +1299,7 @@ public static class BuildCalculator
     {
         var pool = ModifierPool.From(build.Sources, build.ActiveState);
         var ctx = new CalcContext(build, cfg, pool, new Breakdown());
-        new Pipeline(new BaseStatsStage(), new OffenseBucketsStage(), new DpsStage()).Run(ctx);
+        new CalcPipeline(new BaseStatsStage(), new OffenseBucketsStage(), new DpsStage()).Run(ctx);
         return new CalcResult(
             NonCrit: ctx.Get(Keys.NonCrit),
             Crit: ctx.Get(Keys.Crit),
