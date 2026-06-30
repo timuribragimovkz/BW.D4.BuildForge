@@ -1,4 +1,5 @@
 using D4BuildForge.Engine.Calc;
+using D4BuildForge.Engine.Config;
 using D4BuildForge.Engine.Core;
 using D4BuildForge.Engine.Model;
 using D4BuildForge.Engine.Pipeline;
@@ -8,6 +9,14 @@ namespace D4BuildForge.Engine;
 
 public static class BuildCalculator
 {
+    private static readonly ISeasonConfigProvider DefaultSeasonConfig = new InMemorySeasonConfigProvider();
+
+    public static CalcResult Calculate(Build build, Season season)
+        => Calculate(build, season, DefaultSeasonConfig);
+
+    public static CalcResult Calculate(Build build, Season season, ISeasonConfigProvider provider)
+        => Calculate(build, provider.Get(season));
+
     public static CalcResult Calculate(Build build, FormulaConfig cfg)
     {
         var pool = ModifierPool.From(build.Sources, build.ActiveState);
