@@ -42,6 +42,18 @@ scenario becomes a **golden fixture**. End state: a locked baseline where **Game
 - **Milestone 2:** *splice in* a `Mitigation` stage (target armor + level-difference → damage reduction) to
   match the **actual on-dummy hit** — deliberately exercising the "insert a stage anywhere" architecture.
 
+### Delivery phasing (strategic)
+- **Phase 0 — local product (now, the focus).** Everything runs and is testable **locally only**: pure
+  `Engine` + xUnit golden fixtures, plus DynamoDB **Local via Docker** and local config vessels. **No AWS, no
+  cloud, no auth/security, no Linear** yet. Goal: a real, correct, usable-locally product (Druid Maul baseline,
+  then expansion). This stays the mode "for a while."
+- **Phase 1 — web-enable.** Only once the product is proven locally: stand up the web UI and the
+  Bruceware-style machinery (AWS infra, security, Linear, CI, etc.) to make it usable online.
+- **Phase 2 — public release.**
+
+Kept deliberately **separate from Bruceware** (own repo, own tables, own infra; only the generic BW.Libs.Config
+NuGet is shared). Phase 0 is what this spec plans.
+
 ### Non-goals for v1 (roadmap, §8)
 - Web UI front-end (the API contract is defined; the SPA/Blazor front-end is later).
 - Defences/life/EHP and movement-speed stages (channels exist in the model; stages come later).
