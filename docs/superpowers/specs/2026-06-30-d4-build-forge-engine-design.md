@@ -94,6 +94,20 @@ Mirrors PoB's proven pipeline (`ModParser → ModDB/ModStore → calc passes →
 3. **Pipeline of Stages** — ordered, **insertable** consumers that read resolved values and write results +
    a full breakdown.
 
+### 3.3 Maximum-modularity contract (the spine of the whole design)
+Every piece — a modifier source, a stage, a game-content table, a class-specific part — is **independent and
+agnostic of every other piece**. Pieces share only one small, stable vocabulary: `StatChannel`, `BucketKey`,
+and `Tag`. Concretely:
+
+- The **engine knows nothing** about classes, items, or specific mechanics — only modifiers, buckets, conditions.
+- **Only the orchestrator (`BuildAssembler`) knows how to assemble.** It maps a *selection* (above all, the
+  class) to which pieces/tables to pull, and snaps them together. *All* "knowledge of the whole" lives there
+  and nowhere else.
+- **Adding anything new** (a new affix, a new class mechanic, a new stage) = drop in a self-contained module +
+  data and extend only the orchestrator's mapping. No change ripples across other pieces.
+- **Anti-pattern, banned:** class conditionals in formula logic — e.g. Ava's `IF(C9="Barbarian",900,800)`.
+  That becomes a per-class `MainStatDivisor` **data** value. There is never a `switch(class)` in the engine.
+
 ---
 
 ## 4. Core model (in `D4BuildForge.Engine`)
@@ -165,6 +179,40 @@ record FormulaConfig(...);                     // tuning constants from BW.Libs.
 - **Full bucket breakdown**: for each variant, every modifier, the bucket it landed in, each bucket's
   `(base + Σ)`, and the running product — *exactly where* any number comes from. This is the primary tool for
   the user's "find where we diverge from the game" loop.
+
+### 4.7 Class-specific LEGO parts
+Classes differ a lot; we model every difference as **modular data + `IModifierSource`s + `Tag`s**, never as
+engine code (per §3.3). A class contributes parts of these *types* — each an independent brick the orchestrator
+selects:
+
+1. **Primary attribute + main-stat divisor** — which stat is "main", and the divisor (e.g. 800; 900 Barbarian).
+   Pure data (per-class `CalculationSettings`), not a conditional.
+2. **Resource** — Fury / Mana / Spirit / Energy / Essence / Vigor / … . A piece; feeds resource-gated
+   conditions and skills (mostly irrelevant to the damage tooltip, present for completeness).
+3. **Class-mechanic module** — the signature system, a selectable that emits modifiers (table below).
+4. **Form / stance system** — e.g. Druid Human/Werewolf/Werebear. Forms are `Tag`s + form-bonus
+   `IModifierSource`s; skills are form-gated by condition. (Form bonuses are real numbers — e.g. Werebear gives
+   +Damage Reduction & +Max Life, Werewolf +Attack/Move Speed — all data.)
+5. **Class tags** — Werebear, Werewolf, Imbued, Minion, Shapeshift, … used as modifier `conditions`.
+6. **Companions / minions** — attribute-inheriting sub-entities (Druid companions inherit 100% of attributes;
+   Necromancer minions). Modeled later as their own sources.
+
+**Per-class catalog** (current game = **8 classes**; Paladin & Warlock were added in "Lord of Hatred" — this
+validates the `Paladin` entry in Ava's sheet). Druid is fleshed out for v1; the rest are catalog stubs filled
+from the live game when their turn comes. The model must *accommodate* them with **zero engine changes**.
+
+| Class | Primary attr | Resource | Signature mechanic (module) |
+|---|---|---|---|
+| **Druid** (v1) | Willpower | Spirit | **Spirit Boons** (Deer/Eagle/Snake/Wolf; bond → 2 boons, others 1) + **Shapeshift forms** (Human/Werewolf/Werebear) + Companions; Earth/Storm, Fortify, Overpower |
+| Barbarian | Strength | Fury | **Arsenal** (4 weapon slots + weapon expertise); Shouts, Berserking; divisor 900 |
+| Sorcerer | Intelligence | Mana | **Enchantments** (equip skills as passive slots); fire/cold/lightning |
+| Rogue | Dexterity | Energy (+Combo Points) | **Specialization** (Combo Points / Inner Sight / Preparation); Imbuements (Shadow/Poison/Cold) |
+| Necromancer | Intelligence | Essence (+Corpses) | **Book of the Dead** (minion specialization / sacrifice); Curses |
+| Spiritborn | Dexterity *(confirm)* | Vigor | **Spirit Hall** (up to 2 Guardians: Gorilla/Eagle/Jaguar/Centipede) |
+| Paladin | TBD *(data)* | TBD | TBD — possibly "Seals" (cf. Ava's SEAL MULTIPLIER block) |
+| Warlock | TBD *(data)* | TBD | TBD |
+
+**v1 scope reminder:** Druid only. This section exists so the LEGO model is provably general before we lock it.
 
 ---
 
@@ -259,6 +307,8 @@ Each its own spec → plan → implementation cycle, rough order:
 - **Testing:** xUnit; golden fixtures stored as data alongside tests; engine/assembly tests need no Docker.
 - **No hardcoded game constants in formula logic** — all values are data (§1, §5).
 - **Breakdown-first** — any computed number must be explainable via the breakdown (§4.6).
+- **Maximum modularity (§3.3)** — pieces are independent and agnostic; only `BuildAssembler` knows the whole.
+  No `switch(class)` / class conditionals in the engine; class differences are data + sources + tags.
 - **Project separation** — own repo, own DynamoDB tables; only the generic BW.Libs.Config NuGet is shared, and
   only in `Storage`.
 
