@@ -35,8 +35,30 @@ public class MaulValidationTests
                 CritChance: 0.05, CritDamagePct: 0,          // 50% sheet crit dmg = the BASE ×1.5, not a bucket
                 AttackSpeedPct: 0, VulnerablePct: 0,
                 TargetVulnerable: false, InWerebear: true,
-                Season: Season.Current),
+                Season: new Season("s13")),
             expectedNonCrit: 6.5);                            // game dummy white-hit average
+
+    // ── LIVE GOLDEN FIXTURE #2 — Season 14, level 70 Druid, CLAW (test gear) ────────
+    // NOTE: MaulScenario is skill-agnostic (the "Maul*" field names are legacy — rename
+    //       to SkillScenario later). Here MaulBaseCoeff = Claw's rank-1 0.60.
+    // Live read (lvl-70, 2H weapon, stripped test gear — no additive/[x]/paragon):
+    //   Willpower 365 · 2H weapon 2755–4005 (avg 3380) · Claw rank 1 = 60% · crit chance 15.2%
+    // Cross-checks (Ava's model, ×0.2 intact, S14 formula unchanged for Druid):
+    //   Claw tooltip = 0.60 × 3380 × (1 + 365/800) = 2953.4  → game showed 2953 (exact).
+    //   Actual hit   = tooltip × 0.2 = 590.7                 → game whites 459–748 (band centers ~590).
+    //   Crit avg     = 590.7 × 1.5   = 885.9                 → game 10-crit avg 895.8 (1.1%).
+    [Fact]
+    public void Live_s14_lvl70_claw_test_gear_matches_dummy()
+        => AssertMatchesGame(
+            new MaulScenario(
+                Level: 70, MainStat: 365, WeaponDamage: 3380,  // 2H avg (2755+4005)/2
+                MaulBaseCoeff: 0.60, MaulRanks: 1,             // Claw rank 1 = 60%
+                AdditivePct: 0, AllDamagePct: 0,
+                CritChance: 0.152, CritDamagePct: 0,
+                AttackSpeedPct: 0, VulnerablePct: 0,
+                TargetVulnerable: false, InWerebear: true,
+                Season: new Season("s14")),
+            expectedNonCrit: 590.6);                            // = game Claw tooltip 2953 × 0.2
 
     private static void AssertMatchesGame(MaulScenario scenario, double expectedNonCrit)
     {

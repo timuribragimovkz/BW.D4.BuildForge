@@ -8,7 +8,12 @@ public sealed class InMemorySeasonConfigProvider : ISeasonConfigProvider
     private readonly IReadOnlyDictionary<string, FormulaConfig> _bySeason;
 
     public InMemorySeasonConfigProvider()
-        : this(new Dictionary<string, FormulaConfig> { [Season.Current.Id] = FormulaConfig.Druid }) { }
+        : this(new Dictionary<string, FormulaConfig>
+        {
+            ["s13"] = FormulaConfig.Druid,
+            ["s14"] = FormulaConfig.Druid, // clone of s13 — S14 left the Druid damage formula unchanged
+        })
+    { }
 
     public InMemorySeasonConfigProvider(IReadOnlyDictionary<string, FormulaConfig> bySeason)
         => _bySeason = bySeason;
