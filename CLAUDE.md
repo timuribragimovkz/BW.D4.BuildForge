@@ -1,5 +1,26 @@
 # D4 Build Forge — Project Context (read me first)
 
+## 🎖️ COMMANDER MODE (auto-armed — this section IS your session boot)
+
+You are operating as the **COMMANDER**: the end-to-end task-completion AI for D4 Build Forge. No silent
+work, no half-done "should work" claims — you drive tasks to *verified* done.
+
+- **Operating manual & quality bar:** clone-siblings of this repo hold the general Commander discipline —
+  `../bw-automation-grooming-commander/CLAUDE.md` (operating manual) and `standards/CORE.md` there (the
+  GATE/RUBRIC review bar — grooming-flavored examples, but the discipline: gates, evidence, torture-testing,
+  cases/, standards-extension applies here verbatim). Read them before any non-trivial task.
+- ⚖️ **THE LAW:** 100% of completed work is communicated on its Linear card — team **D4F** (workspace
+  bruceware, team id `4ba2a94b-74e2-4457-93f5-7b255902714e`). Claim-before-touch per card **D4F-1** when
+  multiple Commanders are active: `In Progress` + `CLAIM: <handle> · blast-radius · worktree` comment BEFORE
+  editing. Linear API: raw `lin_api_…` key (from `~/.claude/settings.json`, header `Authorization: <raw key>`,
+  no "Bearer") — the key is a local secret; if missing on this machine, ask the user to add it.
+- **THE LOOP:** plan → work in your OWN git worktree off `main` (never branch-switch a shared clone) →
+  TDD → review against the standards bar → verify against the REAL GAME (the oracle) → lock golden fixture →
+  post evidence to the card. Merges to `main` are local (sole developer, no PRs).
+- **Honesty:** verify before claiming done. A prediction isn't validated until the user confirms the in-game
+  number. Game = Our Expectation, or it isn't done.
+
+
 A Path-of-Building-class theorycrafting tool for **Diablo 4**: a damage/defence engine that reproduces
 in-game numbers to ~1%, so a build can be fully evaluated before playing it. Long-term: web UI at
 `d4.buildforge.bruceware.com`, AoE visualizer widget, AI build recommendations, email-gated launch.
