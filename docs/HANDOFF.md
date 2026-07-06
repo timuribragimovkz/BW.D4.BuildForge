@@ -4,6 +4,34 @@ Companion to `/CLAUDE.md` (the operating context — read that FIRST). This file
 how we got here, decisions with their *why*, and everything parked/in-flight. Written by the Mac session
 that built Plans 1–2 and validated the engine against the live game.
 
+## PC SETUP — COMPLETE (2026-07-06, first PC session). Machine state, do not redo.
+Everything in `docs/PC-SETUP.md` is done and verified on the gaming rig:
+- **Repos**: all three cloned side-by-side in `C:\sources\` (this repo at `e2dd71a`+).
+- **Auth**: SSH key registered with GitHub (account `timuribragimovkz`), `gh` CLI logged in, git protocol SSH.
+- **Toolchain**: .NET SDK 10.0.301 installed (9.x also present). `dotnet test` = **74/74 green**
+  (Engine 35, Domain 8, Import 26, Assembly 5) — golden fixtures port cleanly to this machine.
+- **Secrets**: `LINEAR_API_KEY` (raw `lin_api_…`) lives in `~/.claude/settings.json` under `env` —
+  available as an env var in every Claude Code session on this PC. AWS creds NOT set up yet (per manual).
+- **Permissions**: `~/.claude/settings.json` has `permissions.defaultMode = bypassPermissions` —
+  new sessions don't prompt (one-time confirm dialog on first launch).
+- **Screenshot pipeline (VERIFIED end-to-end on a live game capture)**: AutoHotkey v2 runs
+  `tools/capture/hotkeys.ahk` (auto-starts via Startup-folder shortcut, also running now):
+  - **Right Shift + F12** → `captures\inbox\` (gear/stat panels)
+  - **Right Shift + F11** → `captures\hits\` (dummy damage moments)
+  - `tools/capture/shot.ps1` does the capture; it is **DPI-aware** (SetProcessDPIAware) because the
+    monitor is **3840×2160 at 150% Windows scaling** — without it, captures clip to 2560×1440 (bug
+    already hit and fixed; do not remove the DPI call). Exclusive fullscreen captures fine — no
+    windowed mode needed. Output: timestamped PNGs, full 4K frame.
+- **First input already in inbox**: `captures/inbox/shot-20260706-152457-282.png` — equipped
+  **The Basilisk** (Ancestral Unique Staff, 900 IP, 25 quality): 4,428 DPS, [3,737–5,119]/hit,
+  1.00 APS, +283 Weapon Damage, +5,145 Max Life, x40% Crit Damage Mult, x23% Lightning Mult,
+  +12.5% Crit Chance, unique Petrify effect (86%[+] crit-chance-taken / 69%[x] damage-taken),
+  2× socketed x18% All Damage Mult. **Tooltip has a Scroll-Down fold** — ask the user for a
+  scrolled second shot before locking this item's model.
+- **Next task (this is where you pick up)**: item-by-item build recreation per §In-flight below —
+  user screenshots each remaining equipped item; extract affixes (bucket by printed [+]/[x]),
+  wire scenario rows, predict full-build Claw tooltip + hit, verify at the training dummy.
+
 ## Where the project stands (one paragraph)
 The pure-C# engine (`D4BuildForge.Engine`) reproduces the game's damage math and has been validated against
 the live game **twice**: S13 lvl-1 Maul (predicted 6.48 vs dummy avg 6.5) and S14 lvl-70 Claw (tooltip 2953
