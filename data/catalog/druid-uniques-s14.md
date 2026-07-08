@@ -13,11 +13,26 @@
 - **Catalog vessels (fixed, shared, seasonId in PK):** skills (1 vessel per tree branch, node vessels inside),
   passives, unique powers (this file's content), paragon nodes/glyphs. Immutable per season; new season =
   clone-and-tweak.
-- **Build rows (per user):** pointers into the catalog + `IsSelected` state + the user's ROLLED stats per
-  equipped item (rolls vary; ranges live in catalog). Client hydrates catalog+build into the selectable view;
-  calc iterates selected → each selected node/power emits its modifiers (`IModifierSource` pattern) → pool.
-- Unique power entry shape: `{ id, name, slot, dropSource, textVerbatim, rollRange, kind, mathMapping
-  (bucket/op/value/conditions or mechanic-note), verifyStatus, sources[] }`.
+- **Typed vessel hierarchy (user ruling):** vessels inherit from a base Skill-Tree-Vessel type; **`IsSelected`
+  lives ON the inherited vessel type** (the hydrated per-build instances). Persistence: saving a build stores
+  pointers into the fixed catalog + the selection state + the user's ROLLED stats per equipped item (rolls
+  vary; ranges live in catalog).
+- **Bucket sorting by inheritance (user ruling):** each contributing vessel inherits an `IXXXBucket` marker
+  interface (IAdditiveBucket, ICritDamageBucket, IVulnerableBucket, IMultiplicativeBucket, …). At assembly the
+  interface maps to the engine's `BucketKey` — that is what sorts every multiplier into the correct bucket in
+  the correct order when chosen in the UI. Engine stays untouched (interface → BucketKey → resolver).
+- **Conditions (user ruling): ASSUME ALL CONDITIONS MET by default.** Every conditional power ("at 4 Overpower
+  stacks…", "vs Chilled…") is ON in the baseline calc. Each power is **toggleable** in the final calculation —
+  implemented via the engine's existing condition-gating: default `ActiveState` contains ALL condition tags;
+  a UI toggle removes/adds the tag (or disables the source) and the pool re-resolves. Later phases layer
+  condition-difficulty/uptime weighting (boss vs trash) and the AoE/visualization play on the same toggles.
+- Unique power entry shape: `{ id, name, slot, classRestriction, dropSource, textVerbatim, rollRange, kind,
+  bucketInterface, conditionTags[], mathMapping, verifyStatus, sources[] }`.
+- **Mythic 3.0 (S14): "Mythic" is a QUALITY TIER, not an item class.** Any unique can drop/be crafted as its
+  Mythic version (Pandemonium Fragments): **two guaranteed affixes, max rolls, amplified power**. Model as a
+  transform flag on the catalog entry (`mythic: {guaranteedAffixes:2, rolls:max}`), NOT duplicate items. The
+  classic hand-picked list below = **Iconic Mythics**, separate catalog entries in the shared (cross-class)
+  pool. No new uniques in S14; Warlock got class uniques folded into existing pools.
 
 ## Weapons
 | # | Item | Slot | Drops from | Power (primary text ⌇ conflicting alt) | kind | verify |
@@ -68,11 +83,31 @@
 | 36 | Might of the Ursine | Ring | Harbinger of Hatred | [x10–13%] per Resolve stack in Werebear; +1 Resolve/1s in Werebear | modifier (stacking) | ☐ |
 | 37 | Mjölnic Ryng | Ring | Bartuc | While Cataclysm active: unlimited Spirit + (40–100)% increased dmg | modifier (buff-window) | ☐ |
 
-## Mythic (Druid-eligible)
-| # | Item | Slot | Drops from | Power | kind | verify |
+## Iconic Mythics — FULL roster (all classes + general pool)
+> Texts below are DRAFT (pre-S14 era where noted; S14 reworked several). Class column from S14 sources.
+> Druid-eligible rows marked 🐻. ALL rows verify:☐ until screenshotted.
+
+| # | Item | Slot | Classes | Power (draft — verify S14 text) | kind | verify |
 |---|---|---|---|---|---|---|
-| M1 | Ahavarion, Spear of Lycander | Staff | (Mythic pool) | (Druid/Sorc) — text TBD from game | ? | ☐ |
-| M2 | Shattered Vow | 2H | (Mythic pool) | (Barb/Druid/Spiritborn) — text TBD from game | ? | ☐ |
+| M1 | Harlequin Crest (Shako) 🐻 | Helm | ALL | S14 rework: +6 Ranks to ALL Skills + damage reduction (was +4 + 20% DR) | modifier | ☐ S14-REWORKED |
+| M2 | Andariel's Visage 🐻 | Helm | ALL | Lucky Hit: poison nova burst; +attack speed, life-on-hit; DoT-build staple | hybrid | ☐ |
+| M3 | Tyrael's Might 🐻 | Chest | ALL | +Maximum Resists, +All Stats; Lucky Hit while at full life: divine barrage | hybrid | ☐ |
+| M4 | Shroud of False Death 🐻 | Chest | ALL | +1 to ALL Passives; S14 rework: cheat-death component | hybrid | ☐ S14-REWORKED |
+| M5 | Melted Heart of Selig 🐻 | Amulet | ALL | +Max Resource; damage taken drains resource instead of Life (60%→) | mechanic | ☐ |
+| M6 | Ring of Starless Skies 🐻 | Ring | ALL | S14: +Ranks to Core Skills, crit chance, attack speed; spending-resource stacking discount/damage | hybrid | ☐ S14-REWORKED |
+| M7 | Heir of Perdition 🐻 | Helm | ALL | Mother's Favor: Lucky Hit steal-favor + [x] damage — **S14 NERF: 80x → 15x** | modifier | ☐ S14-NERFED |
+| M8 | Ahavarion, Spear of Lycander 🐻 | Staff | Druid, Sorc | Gain a random Shrine effect on Elite kill (cooldown) | mechanic | ☐ |
+| M9 | Shattered Vow 🐻 | 2H (polearm) | Barb, Druid, Spiritborn | Execute/vow mechanic — text TBD from game | mechanic | ☐ |
+| M10 | The Grandfather | 2H Sword | Barb, Necro (+2H-sword classes) | Crit damage massively increased (flat [x]); ignores durability loss — S14 "king" | modifier | ☐ |
+| M11 | Doombringer | 1H Sword | sword classes (Barb/Rogue/Necro…) | Lucky Hit: shadow damage + reduced damage taken; +Max Life stick | hybrid | ☐ |
+| M12 | Nesekem, the Herald | Glaive | Spiritborn only | Marks nearby enemies; bonus vs marked | mechanic | ☐ |
+| M13 | Tuskhelm of Joritz the Mighty | Helm | Barbarian only | Berserking rework: [x] damage + resource while Berserking | hybrid | ☐ |
+| M14 | Blood-Mad Idol | Offhand? | (Necro? verify) | Newer Iconic — existence/class TBD, verify in game | ? | ☐ UNCONFIRMED |
+
+> **Coverage note:** M1–M9 are Druid-relevant (general pool + Druid-restricted). M10–M14 are other-class
+> Iconics listed for the cross-class catalog (all classes eventually). Under Mythic 3.0, EVERY unique in the
+> tables above also has a mythic-tier version (2 guaranteed affixes, max rolls) — that's the transform flag,
+> no separate rows needed.
 
 ## Verification protocol (PC session)
 1. User screenshots the item tooltip → `captures/inbox/`.
