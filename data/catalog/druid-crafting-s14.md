@@ -7,44 +7,44 @@
 ## Gems (top tier shown; socket effects: weapon / armor / jewelry)
 
 ### Amethyst — Flawless Horadric Amethyst (9 tiers)
-- weapon: attr:-2147483377=0.32
-- armor: attr:1228=0.3
-- jewelry: attr:74=4375
+- weapon: Bucketed_Multiplicative_Damage_Type(param 5)=0.32
+- armor: Barrier_Bonus_Percent=0.3
+- jewelry: Resistance(param 5)=4375
 
 ### Diamond — Flawless Horadric Diamond (9 tiers)
-- weapon: attr:-2147483376=0.28
-- armor: attr:8=50
-- jewelry: attr:77=625
+- weapon: Bucketed_Multiplicative_Damage=0.28
+- armor: Plus_All_Stats=50
+- jewelry: Resistance_All=625
 
 ### Emerald — Flawless Horadric Emerald (9 tiers)
-- weapon: attr:-2147483377=0.32
-- armor: attr:7=150
-- jewelry: attr:74=4375
+- weapon: Bucketed_Multiplicative_Damage_Type(param 4)=0.32
+- armor: Dexterity=150
+- jewelry: Resistance(param 4)=4375
 
 ### Mythic — The Empyrean Eye (1 tiers)
-- weapon: attr:17=0.15
-- armor: attr:17=0.15
-- jewelry: attr:17=0.15
+- weapon: All_Stats_Percent_Bonus=0.15
+- armor: All_Stats_Percent_Bonus=0.15
+- jewelry: All_Stats_Percent_Bonus=0.15
 
 ### Ruby — Flawless Horadric Ruby (9 tiers)
-- weapon: attr:-2147483378=0.32
-- armor: attr:4=150
-- jewelry: attr:74=4375
+- weapon: Bucketed_Multiplicative_Damage_Type_FireHoly=0.32
+- armor: Strength=150
+- jewelry: Resistance(param 1)=4375
 
 ### Sapphire — Flawless Horadric Sapphire (9 tiers)
-- weapon: attr:-2147483377=0.32
-- armor: attr:6=150
-- jewelry: attr:74=4375
+- weapon: Bucketed_Multiplicative_Damage_Type(param 3)=0.32
+- armor: Willpower=150
+- jewelry: Resistance(param 3)=4375
 
 ### Skull — Flawless Horadric Skull (9 tiers)
-- weapon: attr:-2147483377=0.32
-- armor: attr:65=0.38
-- jewelry: attr:74=4375
+- weapon: Bucketed_Multiplicative_Damage_Type=0.32
+- armor: Bonus_Healing_Received_Percent=0.38
+- jewelry: Resistance=4375
 
 ### Topaz — Flawless Horadric Topaz (9 tiers)
-- weapon: attr:-2147483377=0.32
-- armor: attr:5=150
-- jewelry: attr:74=4375
+- weapon: Bucketed_Multiplicative_Damage_Type(param 2)=0.32
+- armor: Intelligence=150
+- jewelry: Resistance(param 2)=4375
 
 ## Runes (S14 runewords: 1 Condition + 1 Effect per 2-socket item)
 
