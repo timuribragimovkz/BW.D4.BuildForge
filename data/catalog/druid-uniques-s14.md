@@ -29,10 +29,14 @@
 - Unique power entry shape: `{ id, name, slot, classRestriction, dropSource, textVerbatim, rollRange, kind,
   bucketInterface, conditionTags[], mathMapping, verifyStatus, sources[] }`.
 - **Mythic 3.0 (S14): "Mythic" is a QUALITY TIER, not an item class.** Any unique can drop/be crafted as its
-  Mythic version (Pandemonium Fragments): **two guaranteed affixes, max rolls, amplified power**. Model as a
-  transform flag on the catalog entry (`mythic: {guaranteedAffixes:2, rolls:max}`), NOT duplicate items. The
-  classic hand-picked list below = **Iconic Mythics**, separate catalog entries in the shared (cross-class)
-  pool. No new uniques in S14; Warlock got class uniques folded into existing pools.
+  Mythic version. **Exact transform (confirmed): always Ancestral · UNIQUE POWER VALUE × 1.3 (+30%: 60%→78%,
+  30% DR→39%) · two guaranteed affixes · ALL affixes at max roll.** Craft: IP850+ unique + 5 Pandemonium
+  Fragments in the Horadric Cube (result = random unique of the same item category, as Mythic). Model as a
+  transform on the catalog entry: `mythic: {powerMultiplier: 1.3, guaranteedAffixes: 2, rolls: max,
+  tier: Ancestral}` — NOT duplicate items. ⚠️ verify-live: confirm ×1.3 applies to the power's numeric ROLL
+  only (not durations/stack-caps) on a real mythic tooltip. The classic hand-picked list below = **Iconic
+  Mythics**, separate catalog entries in the shared (cross-class) pool. No new uniques in S14; Warlock got
+  class uniques folded into existing pools.
 
 ## Weapons
 | # | Item | Slot | Drops from | Power (primary text ⌇ conflicting alt) | kind | verify |
