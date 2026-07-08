@@ -50,9 +50,28 @@ Build-guide pages are **Remix SSR** — the entire planner build is embedded in 
 - `paragon.steps[].data[]` — per board: `{ id:"Paragon_Druid_00", nodes:{idx:1}, rotation, position, glyph:"Rare_040_Willpower_Main", glyphLevel }` → `ParagonNode` + `Glyph`.
 - Plus `options` (build toggles), `globalNotes` (changelog/faq/intro/summary as rich text), `buildRating`, `strAndWeak`.
 
-**Resolver requirement:** Maxroll uses numeric/string game IDs (`nid`, paragon node indices, `Item_*` ids,
-`Gem_*`, glyph ids). The Import layer needs a game-data dictionary to map these → human names + our content
-rows. Maxroll's planner ships this dictionary in its JS bundle; harvest it once and treat it as reference data.
+**Resolver requirement — SOLVED (2026-07-09, adversarially audited).** The game-data dictionary is
+**`https://assets-ng.maxroll.gg/d4-tools/game/data.min.json?<ver>`** (~11.6 MB; the `<ver>` hash lives in the
+planner bundle's asset map — the plain path 404s; PTR variant `data.ptr.json`). Keys: `affixes` (6.2k, match
+`nid`→`affixes[key].id`), `items` (11.8k — gear, runes, gems), `skills` (incl. `mods[]` = upgrades/variants
+by id), `skillTrees` (per class + mercenaries + **war plans**), `paragonBoards/paragonNodes/paragonGlyphs`,
+`mercenaries`, `temperingRecipes`, … A working resolver lives at
+**`tools/maxroll-resolver/resolve_maxroll_build.py`** (0 unresolved on two full endgame builds).
+
+**Audited semantics (learned the hard way — respect these):**
+- `paragon.steps[]` / `skillTree.steps[]` are FULL progression snapshots; the canonical one is
+  **`steps[<collection>.position]`** (planner's own selector) — NOT `steps[-1]` (that's often the
+  aspirational "Max Paragon lvl-150 glyphs" step).
+- Paragon stored node indices are in the **UNROTATED 21×21 base grid**; `rotation` is render-only
+  (`paragonRotateIndex`) — never rotate indices when resolving node identity.
+- Skill-tree node `reward.mod` (an id) → `skills[power].mods[]` entry by `.id` = the named
+  upgrade/variant/Form-Node (e.g. "Claw — Dash"). Rank 0 = the UNselected half of a choice pair; omit.
+- `item.upgrade` = upgrade/quality tier (verified 25 == the "25 quality" on a live S14 tooltip; the bundle
+  tracks `masterwork` separately — don't conflate).
+- `profile.warPlans[i]` allocations resolve via `skillTrees["Warplans_*"]`; mercenary trees via
+  `skillTrees["Mercenary_*"]`. Both matter for build recreation — don't drop them.
+- Aspects resolve to affix keys (`legendary_druid_028_x2`); data.min.json has no aspect display-name table
+  (desc text only). Item pools are shared across profiles — resolve through `profile.items[slot]` only.
 
 ---
 
