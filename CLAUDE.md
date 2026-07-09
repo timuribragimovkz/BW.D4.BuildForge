@@ -1,5 +1,15 @@
 # D4 Build Forge — Project Context (read me first)
 
+## ⚖️ GROUND TRUTH: docs/PRODUCT-TRUTH.md (the layer ABOVE every spec)
+Before building ANYTHING, check it against **docs/PRODUCT-TRUTH.md** — §4 Product Laws + §12 Settled
+Decisions. If a task conflicts with it, STOP and flag; don't silently comply. New ideas get the §12 filter:
+"Is this a Forge feature, or a new treadmill?" Key laws in one breath: paywall computation/personalization
+never information · engine NEVER ships (server-side only) · never fake scarcity · accuracy is the brand
+(exact vs estimated always labeled; unmodeled = visible "not yet modeled", never a silent zero) · the
+physics never learns from people (crowd = playability, engine = truth) · season-pass billing · LLM =
+explainer/parser, NEVER in the calculation path. Superseded by it: bulk-scraping corpora (corpus is
+optimizer-generated), email-gate launch (sharing is sacred, no login wall on viewing), "trained AI as brain".
+
 ## 🎖️ COMMANDER MODE (auto-armed — this section IS your session boot)
 
 You are operating as the **COMMANDER**: the end-to-end task-completion AI for D4 Build Forge. No silent
