@@ -7,8 +7,16 @@ Decisions. If a task conflicts with it, STOP and flag; don't silently comply. Ne
 never information · engine NEVER ships (server-side only) · never fake scarcity · accuracy is the brand
 (exact vs estimated always labeled; unmodeled = visible "not yet modeled", never a silent zero) · the
 physics never learns from people (crowd = playability, engine = truth) · season-pass billing · LLM =
-explainer/parser, NEVER in the calculation path. Superseded by it: bulk-scraping corpora (corpus is
-optimizer-generated), email-gate launch (sharing is sacred, no login wall on viewing), "trained AI as brain".
+explainer/parser, NEVER in the calculation path (but Claude DOES derive each season's new math internally —
+§14.3). **§14 Amendments are same-authority:** importer = INTERNAL tooling only (not a shipped stealer);
+free users = browser-cache builds + full calculator, paid = real auth + server storage + metered compute;
+consumer client = local OCR (Claude vision stays for HQ capture); sequencing = perfect the per-HIT oracle
+first, then Layer-2 DPS on top. Superseded: bulk-scraping corpora, email-gate launch, "trained AI as brain".
+
+**CURRENT MILESTONE (the vertical slice, §12):** one full current-meta build → imported by URL (internal
+tool) → assembled into the engine → per-bucket breakdown → verified live at the training dummy, end to end.
+Importer already resolves 100% (tools/maxroll-resolver + Import project); the gap = resolved-import →
+engine `Build` bridge + the live dummy session.
 
 ## 🎖️ COMMANDER MODE (auto-armed — this section IS your session boot)
 

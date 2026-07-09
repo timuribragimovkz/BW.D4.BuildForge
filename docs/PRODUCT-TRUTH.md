@@ -148,3 +148,27 @@ The whole business is two products. Both are personalized computation → unleak
 ---
 
 **The one-sentence version:** *Give away the answers to the questions everyone asks; sell CPU time on the questions only they asked — about their gear, their constraints, and their next hour.*
+
+---
+
+## 14. Amendments (2026-07-09, post-review with Tim — same authority as the sections above)
+
+1. **Build importer = INTERNAL tooling.** Kept for us: fast full-build test inputs (Maxroll URL → resolved
+   build in seconds). It does NOT ship in the end product as a Maxroll/Mobalytics "stealer." Whether any
+   public import surface ever exists is a separate future decision — until then, §10's free-tier "URL
+   importer" line is superseded by this amendment.
+2. **Auth & build storage model.** Viewing/sharing stays wall-free (Law: sharing is sacred). Users may auth
+   with any provider they like. FREE users: full DPS calculator, builds stored in BROWSER CACHE only (no
+   server storage). PAID users: proper auth required — server-side stored builds, recommendations/optimizer,
+   and all metered compute sit behind it. Accounts exist exactly where compute or storage is real.
+3. **LLM roles, complete list:** (a) internal season-drop analysis — deriving/updating the season's NEW math
+   and data model when the patch lands (HQ work, Claude-driven); (b) internal capture-pipeline vision;
+   (c) natural-language constraint parsing; (d) answer explanation. NEVER in the runtime calculation path —
+   the engine's math is code + season config, produced with Claude's help, executed without it.
+4. **OCR economics clarified:** HQ/internal capture keeps using Claude vision (cheap at our volume). The
+   consumer companion client uses LOCAL OCR (fixed-font tooltips) with cloud vision only as ambiguity
+   fallback. Same law, two contexts.
+5. **Layer 2 sequencing:** DPS (time domain) was always the goal — but explicitly staged: FIRST perfect the
+   per-hit oracle (current vertical slice), THEN layer cast-frequency/attack-speed/EV-proc math on top to
+   produce true DPS. L2 remains "build early, lightweight first," entered immediately after the per-hit
+   vertical slice ships its receipts.
