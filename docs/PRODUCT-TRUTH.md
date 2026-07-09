@@ -165,9 +165,12 @@ The whole business is two products. Both are personalized computation → unleak
    and data model when the patch lands (HQ work, Claude-driven); (b) internal capture-pipeline vision;
    (c) natural-language constraint parsing; (d) answer explanation. NEVER in the runtime calculation path —
    the engine's math is code + season config, produced with Claude's help, executed without it.
-4. **OCR economics clarified:** HQ/internal capture keeps using Claude vision (cheap at our volume). The
-   consumer companion client uses LOCAL OCR (fixed-font tooltips) with cloud vision only as ambiguity
-   fallback. Same law, two contexts.
+4. **Capture/OCR is role-tiered:** (a) NOW — the capture+vision pipeline is an **Admin/Tester tool** (us:
+   season data ops, fixtures, catalogs; Claude vision fine at our volume). (b) LATER, once the pipeline
+   satisfies us — a convenient **photo-upload path for Console and "lazy" users**: a small companion app
+   takes pictures, the user logs in with their same account, and the images land in the right place for
+   processing — **PAID customers only**. (c) FREE users recreate items by hand in the web UI (manual entry
+   stays first-class forever). Consumer-scale processing = local OCR first, cloud vision as fallback.
 5. **Layer 2 sequencing:** DPS (time domain) was always the goal — but explicitly staged: FIRST perfect the
    per-hit oracle (current vertical slice), THEN layer cast-frequency/attack-speed/EV-proc math on top to
    produce true DPS. L2 remains "build early, lightweight first," entered immediately after the per-hit
